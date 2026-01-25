@@ -5060,7 +5060,7 @@ add_entrypoint_object(
   HDRS
     ../f16fmaf128.h
   DEPENDS
-    libc.src.__support.math.f16fmaf128.h
+    libc.src.__support.math.f16fmaf128
 )
 
 add_entrypoint_object(
