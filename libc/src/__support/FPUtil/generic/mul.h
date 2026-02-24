@@ -95,7 +95,7 @@ mul(InType x, InType y) {
   DyadicFloat xd(x);
   DyadicFloat yd(y);
 
-  DyadicFloat result = rounded_mul(xd, yd);
+  DyadicFloat result = quick_mul(xd, yd);
   return result.template as<OutType, /*ShouldSignalExceptions=*/true>();
 }
 
