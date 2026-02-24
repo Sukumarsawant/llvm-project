@@ -22,7 +22,7 @@ static constexpr uint16_t SUBNORM_NEG_STOP = 0x807FU;
 
 TEST_F(LlvmLibcFmaBf16Test, SubnormalNegativeRange) {
   static constexpr bfloat16 z_values[] = {zero,    neg_zero,   inf,
-                               neg_inf, min_normal, max_normal};
+                                          neg_inf, min_normal, max_normal};
   for (uint16_t v1 = SUBNORM_NEG_START; v1 <= SUBNORM_NEG_STOP; v1++) {
     for (uint16_t v2 = SUBNORM_NEG_START; v2 <= SUBNORM_NEG_STOP; v2++) {
 
@@ -45,11 +45,11 @@ TEST_F(LlvmLibcFmaBf16Test, SubnormalNegativeRange) {
 
 TEST_F(LlvmLibcFmaBf16Test, SpecialNumbers) {
   static constexpr bfloat16 z_values[] = {zero,    neg_zero,   inf,
-                               neg_inf, min_normal, max_normal};
+                                          neg_inf, min_normal, max_normal};
   static constexpr bfloat16 x_values[] = {zero,    neg_zero,   inf,
-                               neg_inf, min_normal, max_normal};
+                                          neg_inf, min_normal, max_normal};
   static constexpr bfloat16 y_values[] = {zero,    neg_zero,   inf,
-                               neg_inf, min_normal, max_normal};
+                                          neg_inf, min_normal, max_normal};
 
   for (const bfloat16 &x : x_values) {
     for (const bfloat16 &y : y_values) {

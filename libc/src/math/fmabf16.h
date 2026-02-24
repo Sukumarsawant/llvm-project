@@ -14,7 +14,7 @@
 
 namespace LIBC_NAMESPACE_DECL {
 
-bfloat16 fmabf16(bfloat16 x, bfloat16 y, bfloat16 z);
+  bfloat16 fmabf16(bfloat16 x, bfloat16 y, bfloat16 z);
 
 } // namespace LIBC_NAMESPACE_DECL
 
