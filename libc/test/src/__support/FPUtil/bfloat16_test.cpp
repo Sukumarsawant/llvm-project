@@ -67,3 +67,41 @@ TEST_F(LlvmLibcBfloat16ConversionTest, FromInteger) {
     EXPECT_FP_EQ_ALL_ROUNDING(mpfr_bfloat, libc_bfloat);
   }
 }
+TEST_F(LlvmLibcBfloat16ConversionTest, MultiplyAssign) {
+  
+  {
+    BFloat16 a = zero;
+    a *= zero;
+    EXPECT_FP_EQ(zero, a);
+  }
+
+  {
+    BFloat16 a = neg_zero;
+    a *= neg_zero;
+    EXPECT_FP_EQ(zero, a);
+  }
+
+  {
+    BFloat16 a = zero;
+    a *= neg_zero;
+    EXPECT_FP_EQ(neg_zero, a);
+  }
+
+  {
+    BFloat16 a = neg_zero;
+    a *= zero;
+    EXPECT_FP_EQ(neg_zero, a);
+  }
+
+  {
+    BFloat16 a{1.0f};
+    a *= BFloat16{1.0f};
+    EXPECT_FP_EQ(BFloat16{1.0f}, a);
+  }
+
+  {
+    BFloat16 a{3.0f};
+    a *= BFloat16{5.0f};
+    EXPECT_FP_EQ(BFloat16{15.0f}, a);
+  }
+}
