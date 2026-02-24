@@ -75,7 +75,7 @@ TEST_F(LlvmLibcBfloat16ConversionTest, MultiplyAssign) {
 for (const BFloat16 &x : val) {
     for (const BFloat16 &y : val) {
         MPFRNumber mpfr_a{x}, mpfr_b{y};
-        mpfr_a.mul(mpfr_b);
+        mpfr_a = mpfr_a.mul(mpfr_b);
         BFloat16 mpfr_bfloat = mpfr_a.as<BFloat16>();
         
         BFloat16 result = x;
