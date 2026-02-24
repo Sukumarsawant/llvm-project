@@ -69,39 +69,31 @@ TEST_F(LlvmLibcBfloat16ConversionTest, FromInteger) {
 }
 TEST_F(LlvmLibcBfloat16ConversionTest, MultiplyAssign) {
   
-  {
-    BFloat16 a = zero;
-    a *= zero;
-    EXPECT_FP_EQ(zero, a);
-  }
-
-  {
-    BFloat16 a = neg_zero;
-    a *= neg_zero;
-    EXPECT_FP_EQ(zero, a);
-  }
-
-  {
-    BFloat16 a = zero;
-    a *= neg_zero;
-    EXPECT_FP_EQ(neg_zero, a);
-  }
-
-  {
-    BFloat16 a = neg_zero;
-    a *= zero;
-    EXPECT_FP_EQ(neg_zero, a);
-  }
-
-  {
-    BFloat16 a{1.0f};
-    a *= BFloat16{1.0f};
-    EXPECT_FP_EQ(BFloat16{1.0f}, a);
-  }
-
-  {
-    BFloat16 a{3.0f};
-    a *= BFloat16{5.0f};
-    EXPECT_FP_EQ(BFloat16{15.0f}, a);
+  // MPFR-based MultiplyAssign tests for 1, -1, 2, 3, +0, -0
+  struct TestCase {
+    BFloat16 lhs;
+    BFloat16 rhs;
+  };
+  TestCase cases[] = {
+    {BFloat16{1.0f}, BFloat16{1.0f}},
+    {BFloat16{-1.0f}, BFloat16{1.0f}},
+    {BFloat16{1.0f}, BFloat16{-1.0f}},
+    {BFloat16{-1.0f}, BFloat16{-1.0f}},
+    {BFloat16{2.0f}, BFloat16{3.0f}},
+    {BFloat16{3.0f}, BFloat16{2.0f}},
+    {zero, zero},
+    {neg_zero, neg_zero},
+    {zero, neg_zero},
+    {neg_zero, zero},
+  };
+  for (const auto& tc : cases) {
+    BFloat16 a = tc.lhs;
+    BFloat16 b = tc.rhs;
+    a *= b;
+    MPFRNumber mpfr_lhs{static_cast<float>(tc.lhs)};
+    MPFRNumber mpfr_rhs{static_cast<float>(tc.rhs)};
+    MPFRNumber mpfr_result = mpfr_lhs; mpfr_result.mul(mpfr_rhs);
+    BFloat16 ref = mpfr_result.as<BFloat16>();
+    EXPECT_FP_EQ_ALL_ROUNDING(ref, a);
   }
 }
