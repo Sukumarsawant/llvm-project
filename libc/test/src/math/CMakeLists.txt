@@ -2238,6 +2238,18 @@ log1p_test
 )
 
 add_fp_unittest(
+  log1pf16_test
+  NEED_MPFR
+  SUITE
+    libc-math-unittests
+  SRCS
+    log1pf16_test.cpp
+  DEPENDS
+    libc.src.math.log1pf16
+    libc.src.__support.FPUtil.fp_bits
+)
+
+add_fp_unittest(
   log1pf_test
   NEED_MPFR
   SUITE
