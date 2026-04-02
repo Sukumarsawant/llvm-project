@@ -31,7 +31,7 @@ namespace LIBC_NAMESPACE_DECL {
 
 namespace math {
 
-LIBC_INLINE float16 log1pf(float16 x) {
+LIBC_INLINE float16 log1pf16(float16 x) {
 /*
 Points to consider near x = -1 , 0 
 Domain (1+x)>0
@@ -55,28 +55,50 @@ Domain (1+x)>0
 
   // Case : x+1<=0 => x<=-1
   // or     x+1 == 1 => x ==0
-  // Case : -1<=x<=0 
-  if(x_u <= 0x8000U && x_u > INF ){
-    // log1p(+/- 0) = log(1 + (+/- 0)) = +/- 0 
+
+
+ // ── x <= 0 ────────────────────────────────────────────────────────────────
+  if (x_u & 0x8000U) {
+
+    // log1p(-0) = -0
     if (x_abs == 0U)
       return x;
-    // x = -1 => y = log1p(x) = -inf
-    if(LIBC_UNLIKELY(x_u==0xBC00U)){
-        fputil::raise_except_if_required(FE_DIVBYZERO);
-        return fputil::cast<float16>(0x7C00);
+
+    // x == -1 => -inf
+    if (x_u == 0xBC00U) {
+      fputil::raise_except_if_required(FE_DIVBYZERO);
+      return FPBits::inf(Sign::NEG).get_val();
     }
 
-    // use table
+    // x < -1 => NaN
+    if (x_u > 0xBC00U) {
+      fputil::set_errno_if_required(EDOM);
+      fputil::raise_except_if_required(FE_INVALID);
+      return FPBits::quiet_nan().get_val();
+    }
+
+    // -1 < x < 0 => fall through to computation
   }
 
-  // Case 0<x<+INF
-  if(x_u < 0xBC00U){
-
+  // ── x > 0 special values ──────────────────────────────────────────────────
+  if (LIBC_UNLIKELY(x_abs >= 0x7C00U)) {
+    if (x_u == 0x7C00U)                          // +inf => +inf
+      return x;
+    if (FPBits(x).is_signaling_nan())             // sNaN => raise + quiet
+      fputil::raise_except_if_required(FE_INVALID);
+    return FPBits::quiet_nan().get_val();          // NaN => qNaN
   }
+
+  // ── Normal computation (x in (-1, -2^-3] U [2^-3, +inf)) ────────────────
+  // TODO: small x poly + table path
+
+  return fputil::cast<float16>(0.0f); // placeholder
+  }
+
 }
 
 } // namespace math
 } // namespace LIBC_NAMESPACE_DECL
 
 
-#endif // LLVM_LIBC_SRC___SUPPORT_MATH_LOG1PF_H
+#endif // LLVM_LIBC_SRC___SUPPORT_MATH_LOG1PF16_H
