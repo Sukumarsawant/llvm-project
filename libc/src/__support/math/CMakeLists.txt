@@ -3314,7 +3314,7 @@ add_header_library(
   HDRS
     tanpibf16.h
   DEPENDS
-    .sincosf_utils
+    .sincosf16_utils
     libc.hdr.errno_macros
     libc.hdr.fenv_macros
     libc.src.__support.FPUtil.cast
