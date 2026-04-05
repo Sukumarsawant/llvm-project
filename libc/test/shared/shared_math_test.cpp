@@ -481,6 +481,8 @@ TEST(LlvmLibcSharedMathTest, AllBFloat16) {
                                                          bfloat16(0.0)));
   EXPECT_FP_EQ(bfloat16(0.0), setpayloadsigbf16_res);
 
+  EXPECT_FP_EQ(bfloat16(0.0), LIBC_NAMESPACE::shared::tanpibf16(bfloat16(0.0)));
+
   EXPECT_FP_EQ(bfloat16(0.0), LIBC_NAMESPACE::shared::log_bf16(bfloat16(1.0)));
 
   bfloat16 neg_min_denormal = FPBits::min_subnormal(Sign::NEG).get_val();
