@@ -269,6 +269,7 @@
 #include "math/tanhf.h"
 #include "math/tanhf16.h"
 #include "math/tanpif.h"
+#include "math/tanpibf16.h"
 #include "math/tanpif16.h"
 
 #endif // LLVM_LIBC_SHARED_MATH_H

@@ -592,6 +592,7 @@ add_math_entrypoint_object(tanhf16)
 
 add_math_entrypoint_object(tanpif)
 add_math_entrypoint_object(tanpif16)
+add_math_entrypoint_object(tanpibf16)
 
 add_math_entrypoint_object(tgamma)
 add_math_entrypoint_object(tgammaf)

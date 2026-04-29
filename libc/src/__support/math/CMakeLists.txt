@@ -3396,6 +3396,22 @@ add_header_library(
 )
 
 add_header_library(
+  tanpibf16
+  HDRS
+    tanpibf16.h
+  DEPENDS
+    .sincosf16_utils
+    libc.hdr.errno_macros
+    libc.hdr.fenv_macros
+    libc.src.__support.FPUtil.cast
+    libc.src.__support.FPUtil.fenv_impl
+    libc.src.__support.FPUtil.fp_bits
+    libc.src.__support.FPUtil.multiply_add
+    libc.src.__support.macros.optimization
+    libc.src.__support.FPUtil.bfloat16
+)
+
+add_header_library(
   tanpif16
   HDRS
     tanpif16.h

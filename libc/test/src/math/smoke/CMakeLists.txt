@@ -135,6 +135,19 @@ add_fp_unittest(
 )
 
 add_fp_unittest(
+  tanpibf16_test
+  SUITE
+    libc-math-smoke-tests
+  SRCS
+    tanpibf16_test.cpp
+  DEPENDS
+    libc.hdr.errno_macros
+    libc.src.math.tanpibf16
+    libc.hdr.fenv_macros
+    libc.src.__support.FPUtil.bfloat16
+)
+
+add_fp_unittest(
   tanpif_test
   SUITE
     libc-math-smoke-tests
