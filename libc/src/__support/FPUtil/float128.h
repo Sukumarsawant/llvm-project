@@ -10,9 +10,6 @@
 #ifndef LLVM_LIBC_SRC___SUPPORT_FPUTIL_FLOAT128_H
 #define LLVM_LIBC_SRC___SUPPORT_FPUTIL_FLOAT128_H
 
-#include "hdr/stdint_proxy.h"
-#include "src/__support/CPP/bit.h"
-#include "src/__support/CPP/type_traits.h"
 #include "src/__support/FPUtil/FPBits.h"
 #include "src/__support/uint128.h"
 #include "src/__support/macros/config.h"
@@ -26,7 +23,7 @@ struct Float128 {
 
   LIBC_INLINE Float128() = default;
 
-    LIBC_INLINE constexpr explicit Float128(UInt128 x) : bits(x) {}
+  LIBC_INLINE constexpr explicit Float128(UInt128 x) : bits(x) {}
 }; // struct Float128
 
 #ifndef LIBC_TYPES_HAS_FLOAT128

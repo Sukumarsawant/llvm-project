@@ -15,6 +15,7 @@ using LIBC_NAMESPACE::operator""_u128;
 
 namespace LIBC_NAMESPACE_DECL {
 namespace fputil {
+
 TEST(LlvmLibcFloat128Test, BasicConstruct) {
   // Verify default construction yields zero
   Float128 a;
