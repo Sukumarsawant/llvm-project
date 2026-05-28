@@ -38,6 +38,6 @@ typedef long double float128;
 // If LIBC_TYPES_FORCE_FLOAT128_EMULATION is set, or no native float128 exists,
 // float128 is defined as Float128 struct via:
 //   using float128 = Float128;
-// in src/__support/FPUtil/float128.hrc/__support/FPUtil/float128.
+// in src/__support/FPUtil/float128.h
 
 #endif // LLVM_LIBC_TYPES_FLOAT128_H

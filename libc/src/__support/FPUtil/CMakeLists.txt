@@ -299,18 +299,11 @@ add_header_library(
   HDRS
     float128.h
   DEPENDS
-    .cast
-    .comparison_operations
-    .dyadic_float
-    libc.hdr.stdint_proxy
-    libc.src.__support.CPP.bit
-    libc.src.__support.CPP.type_traits
-    libc.src.__support.FPUtil.generic.add_sub
-    libc.src.__support.FPUtil.generic.div
-    libc.src.__support.FPUtil.generic.mul
-    libc.src.__support.macros.config
-    libc.src.__support.macros.properties.types
+    .FPBits
     libc.src.__support.uint128
+    libc.src.__support.macros.config
+    libc.src.__support.CPP.type_traits
+    libc.src.__support.macros.properties.types
 )
 
 add_subdirectory(generic)

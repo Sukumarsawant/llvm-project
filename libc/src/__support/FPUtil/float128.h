@@ -14,11 +14,9 @@
 #include "src/__support/CPP/bit.h"
 #include "src/__support/CPP/type_traits.h"
 #include "src/__support/FPUtil/FPBits.h"
-#include "src/__support/macros/config.h"
 #include "src/__support/uint128.h"
 #include "src/__support/macros/config.h"
 #include "src/__support/macros/properties/types.h"
-#include "src/__support/uint128.h"
 
 namespace LIBC_NAMESPACE_DECL {
 namespace fputil {
@@ -29,7 +27,7 @@ struct Float128 {
   LIBC_INLINE Float128() = default;
 
     LIBC_INLINE constexpr explicit Float128(UInt128 x) : bits(x) {}
-}; // struct Float128128
+}; // struct Float128
 
 #ifndef LIBC_TYPES_HAS_FLOAT128
 using float128 = Float128;
