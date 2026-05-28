@@ -30,6 +30,8 @@
 namespace LIBC_NAMESPACE_DECL {
 namespace fputil {
 
+struct Float128;
+
 // The supported floating point types.
 enum class FPType {
   IEEE754_Binary16,
@@ -807,10 +809,10 @@ template <typename T> LIBC_INLINE static constexpr FPType get_fp_type() {
   else if constexpr (cpp::is_same_v<UnqualT, float16>)
     return FPType::IEEE754_Binary16;
 #endif
-#if defined(LIBC_TYPES_HAS_FLOAT128)
-  else if constexpr (cpp::is_same_v<UnqualT, float128>)
+
+  else if constexpr (cpp::is_same_v<UnqualT, Float128>)
     return FPType::IEEE754_Binary128;
-#endif
+
   else if constexpr (cpp::is_same_v<UnqualT, bfloat16>)
     return FPType::BFloat16;
   else
@@ -827,7 +829,8 @@ template <typename T> LIBC_INLINE static constexpr FPType get_fp_type() {
 // It derives its functionality to FPRepImpl above.
 template <typename T>
 struct FPBits final : public internal::FPRepImpl<get_fp_type<T>(), FPBits<T>> {
-  static_assert(cpp::is_floating_point_v<T>,
+  static_assert(cpp::is_floating_point_v<T> ||
+                cpp::is_same_v<cpp::remove_cv_t<T>, Float128>,
                 "FPBits instantiated with invalid type.");
   using UP = internal::FPRepImpl<get_fp_type<T>(), FPBits<T>>;
   using StorageType = typename UP::StorageType;

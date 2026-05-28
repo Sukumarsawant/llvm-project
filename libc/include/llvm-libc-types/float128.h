@@ -17,20 +17,27 @@
 //
 // TODO: Update C23 `_Float128` type detection again when clang supports it.
 //   https://github.com/llvm/llvm-project/issues/80195
-#if defined(__STDC_IEC_60559_BFP__) && !defined(__clang__) &&                  \
+#if !defined(LIBC_TYPES_FORCE_FLOAT128_EMULATION) && \
+    defined(__STDC_IEC_60559_BFP__) && !defined(__clang__) && \
     !defined(__cplusplus)
 #define LIBC_TYPES_HAS_FLOAT128
 typedef _Float128 float128;
-#elif defined(__FLOAT128__) || defined(__SIZEOF_FLOAT128__)
+#elif !defined(LIBC_TYPES_FORCE_FLOAT128_EMULATION) && \
+      (defined(__FLOAT128__) || defined(__SIZEOF_FLOAT128__))
 // Use __float128 type.  gcc and clang sometime use __SIZEOF_FLOAT128__ to
 // notify the availability of __float128.
 // clang also uses __FLOAT128__ macro to notify the availability of __float128
 // type: https://reviews.llvm.org/D15120
 #define LIBC_TYPES_HAS_FLOAT128
 typedef __float128 float128;
-#elif (LDBL_MANT_DIG == 113)
+#elif !defined(LIBC_TYPES_FORCE_FLOAT128_EMULATION) && \
+      (LDBL_MANT_DIG == 113)
 #define LIBC_TYPES_HAS_FLOAT128
 typedef long double float128;
 #endif
+// If LIBC_TYPES_FORCE_FLOAT128_EMULATION is set, or no native float128 exists,
+// float128 is defined as Float128 struct via:
+//   using float128 = Float128;
+// in src/__support/FPUtil/float128.hrc/__support/FPUtil/float128.
 
 #endif // LLVM_LIBC_TYPES_FLOAT128_H
