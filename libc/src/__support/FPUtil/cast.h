@@ -11,6 +11,7 @@
 
 #include "FPBits.h"
 #include "dyadic_float.h"
+#include "float128.h"
 #include "hdr/fenv_macros.h"
 #include "src/__support/CPP/algorithm.h"
 #include "src/__support/CPP/type_traits.h"
@@ -23,9 +24,15 @@ namespace LIBC_NAMESPACE::fputil {
 // https://github.com/llvm/llvm-project/issues/133517
 template <typename OutType, typename InType>
 LIBC_INLINE constexpr cpp::enable_if_t<(cpp::is_floating_point_v<OutType> ||
-                  cpp::is_same_v<cpp::remove_cv_t<OutType>, float128>) &&
+#ifdef LIBC_TYPES_HAS_FLOAT128
+                  cpp::is_same_v<cpp::remove_cv_t<OutType>, float128> ||
+#endif
+                  cpp::is_same_v<cpp::remove_cv_t<OutType>, Float128>) &&
                  (cpp::is_floating_point_v<InType>  ||
-                  cpp::is_same_v<cpp::remove_cv_t<InType>, float128>), OutType>
+#ifdef LIBC_TYPES_HAS_FLOAT128
+                  cpp::is_same_v<cpp::remove_cv_t<InType>, float128> ||
+#endif
+                  cpp::is_same_v<cpp::remove_cv_t<InType>, Float128>), OutType>
 cast(InType x) {
   // Casting to the same type is a no-op.
   if constexpr (cpp::is_same_v<InType, OutType>) {
@@ -33,8 +40,12 @@ cast(InType x) {
   } else {
     if constexpr (cpp::is_same_v<OutType, bfloat16> ||
               cpp::is_same_v<InType, bfloat16>   ||
-              cpp::is_same_v<OutType, float128>  ||
+              cpp::is_same_v<OutType, Float128>  ||
+              cpp::is_same_v<InType, Float128>
+#ifdef LIBC_TYPES_HAS_FLOAT128
+              || cpp::is_same_v<OutType, float128> ||
               cpp::is_same_v<InType, float128>
+#endif
 #if defined(LIBC_TYPES_HAS_FLOAT16) && !defined(__LIBC_USE_FLOAT16_CONVERSION)
               || cpp::is_same_v<OutType, float16> ||
               cpp::is_same_v<InType, float16>
