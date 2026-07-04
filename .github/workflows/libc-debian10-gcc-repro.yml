@@ -48,9 +48,19 @@ jobs:
           echo 'Acquire::Check-Valid-Until "false";' \
             > /etc/apt/apt.conf.d/99no-check-valid-until
           apt-get -o Acquire::AllowInsecureRepositories=true update
+          # NOTE: buster's apt cmake is 3.13.4, too old (LLVM needs >=3.20).
+          # The buildbot uses cmake 3.20.0 from Kitware, not apt -- install
+          # that below. We still take gcc/ninja from buster to match the worker.
           apt-get install -y --no-install-recommends --allow-unauthenticated \
-            gcc g++ cmake ninja-build git python3 ca-certificates \
+            gcc g++ ninja-build git python3 ca-certificates wget \
             libc6-dev linux-libc-dev
+
+          # Match the buildbot's "cmake version 3.20.0" exactly (from Kitware).
+          wget -q https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.tar.gz
+          tar -xzf cmake-3.20.0-linux-x86_64.tar.gz -C /opt
+          echo "/opt/cmake-3.20.0-linux-x86_64/bin" >> "$GITHUB_PATH"
+          export PATH="/opt/cmake-3.20.0-linux-x86_64/bin:$PATH"
+
           gcc --version
           cmake --version
           ninja --version
