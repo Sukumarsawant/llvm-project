@@ -1,0 +1,105 @@
+# Repro workflow for the libc-x86_64-debian-gcc-fullbuild-dbg buildbot.
+#
+# This mirrors the upstream buildbot (Debian 10 "buster" + its default GCC 8.3)
+# which is NOT part of the normal GitHub Actions matrix -- the gcc fullbuild is
+# commented out in libc-fullbuild-tests.yml. We run it here to reproduce the
+# gcc-8 build/test failure on a fork.
+#
+# NOTE: the owner==llvm guard is intentionally omitted so this runs on forks.
+name: LLVM-libc Debian 10 GCC Fullbuild Repro
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - ci-debian10-gcc-repro
+  pull_request:
+    paths:
+      - 'libc/**'
+      - '.github/workflows/libc-debian10-gcc-repro.yml'
+  workflow_dispatch:
+
+jobs:
+  libc-debian10-gcc:
+    name: libc fullbuild (debian 10 / gcc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # Reproduce the buildbot's OS + toolchain: Debian 10 buster ships GCC 8.3.
+    container:
+      image: debian:10
+      # Some libc tests need extra caps (e.g. SYS_TIME). The runner VM is
+      # already isolated, so privileged is safe here.
+      options: --privileged
+
+    steps:
+      - name: Install build dependencies (buster)
+        run: |
+          set -eux
+          # Buster is EOL: its packages moved to archive.debian.org and the
+          # Release files signatures are expired. Repoint apt and relax the
+          # expired-signature / valid-until checks.
+          printf '%s\n' \
+            'deb http://archive.debian.org/debian buster main' \
+            'deb http://archive.debian.org/debian buster-updates main' \
+            'deb http://archive.debian.org/debian-security buster/updates main' \
+            > /etc/apt/sources.list
+          echo 'Acquire::Check-Valid-Until "false";' \
+            > /etc/apt/apt.conf.d/99no-check-valid-until
+          apt-get -o Acquire::AllowInsecureRepositories=true update
+          # NOTE: buster's apt cmake is 3.13.4, too old (LLVM needs >=3.20).
+          # The buildbot uses cmake 3.20.0 from Kitware, not apt -- install
+          # that below. We still take gcc/ninja from buster to match the worker.
+          apt-get install -y --no-install-recommends --allow-unauthenticated \
+            gcc g++ ninja-build git ca-certificates wget xz-utils \
+            libc6-dev linux-libc-dev
+
+          # Match the buildbot's "cmake version 3.20.0" exactly (from Kitware).
+          wget -q https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.tar.gz
+          tar -xzf cmake-3.20.0-linux-x86_64.tar.gz -C /opt
+          echo "/opt/cmake-3.20.0-linux-x86_64/bin" >> "$GITHUB_PATH"
+          export PATH="/opt/cmake-3.20.0-linux-x86_64/bin:$PATH"
+
+          # Buster ships Python 3.7, but libc's hdrgen uses the dict '|' merge
+          # operator (PEP 584, Python >=3.9). Install a prebuilt standalone
+          # Python 3.11 (no compile) and use it ONLY for hdrgen. GCC stays at
+          # buster's 8.3 so the actual compile failure still reproduces.
+          wget -q -O /tmp/python.tar.gz \
+            https://github.com/astral-sh/python-build-standalone/releases/download/20240107/cpython-3.11.7+20240107-x86_64-unknown-linux-gnu-install_only.tar.gz
+          tar -xzf /tmp/python.tar.gz -C /opt
+          # -> /opt/python/bin/python3.11
+          /opt/python/bin/python3 -m pip install --quiet pyyaml
+          echo "PYTHON3_FOR_HDRGEN=/opt/python/bin/python3" >> "$GITHUB_ENV"
+
+          gcc --version
+          cmake --version
+          ninja --version
+          /opt/python/bin/python3 --version
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Configure CMake
+        run: |
+          set -eux
+          cmake \
+            -G Ninja \
+            -B build \
+            -S runtimes \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -DPython3_EXECUTABLE="${PYTHON3_FOR_HDRGEN}" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DLLVM_ENABLE_RUNTIMES="libc;compiler-rt" \
+            -DLLVM_LIBC_INCLUDE_SCUDO=ON \
+            -DCOMPILER_RT_BUILD_SCUDO_STANDALONE_WITH_LLVM_LIBC=ON \
+            -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
+            -DCOMPILER_RT_SCUDO_STANDALONE_BUILD_SHARED=OFF \
+            -DLLVM_LIBC_FULL_BUILD=ON
+
+      - name: Build check-libc
+        run: |
+          set -eux
+          cmake --build build --parallel --target check-libc
