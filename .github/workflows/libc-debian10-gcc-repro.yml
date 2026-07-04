@@ -37,8 +37,18 @@ jobs:
       - name: Install build dependencies (buster)
         run: |
           set -eux
-          apt-get update
-          apt-get install -y --no-install-recommends \
+          # Buster is EOL: its packages moved to archive.debian.org and the
+          # Release files signatures are expired. Repoint apt and relax the
+          # expired-signature / valid-until checks.
+          printf '%s\n' \
+            'deb http://archive.debian.org/debian buster main' \
+            'deb http://archive.debian.org/debian buster-updates main' \
+            'deb http://archive.debian.org/debian-security buster/updates main' \
+            > /etc/apt/sources.list
+          echo 'Acquire::Check-Valid-Until "false";' \
+            > /etc/apt/apt.conf.d/99no-check-valid-until
+          apt-get -o Acquire::AllowInsecureRepositories=true update
+          apt-get install -y --no-install-recommends --allow-unauthenticated \
             gcc g++ cmake ninja-build git python3 ca-certificates \
             libc6-dev linux-libc-dev
           gcc --version
