@@ -1,0 +1,72 @@
+# Repro workflow for the libc-x86_64-debian-gcc-fullbuild-dbg buildbot.
+#
+# This mirrors the upstream buildbot (Debian 10 "buster" + its default GCC 8.3)
+# which is NOT part of the normal GitHub Actions matrix -- the gcc fullbuild is
+# commented out in libc-fullbuild-tests.yml. We run it here to reproduce the
+# gcc-8 build/test failure on a fork.
+#
+# NOTE: the owner==llvm guard is intentionally omitted so this runs on forks.
+name: LLVM-libc Debian 10 GCC Fullbuild Repro
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - ci-debian10-gcc-repro
+  pull_request:
+    paths:
+      - 'libc/**'
+      - '.github/workflows/libc-debian10-gcc-repro.yml'
+  workflow_dispatch:
+
+jobs:
+  libc-debian10-gcc:
+    name: libc fullbuild (debian 10 / gcc)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # Reproduce the buildbot's OS + toolchain: Debian 10 buster ships GCC 8.3.
+    container:
+      image: debian:10
+      # Some libc tests need extra caps (e.g. SYS_TIME). The runner VM is
+      # already isolated, so privileged is safe here.
+      options: --privileged
+
+    steps:
+      - name: Install build dependencies (buster)
+        run: |
+          set -eux
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            gcc g++ cmake ninja-build git python3 ca-certificates \
+            libc6-dev linux-libc-dev
+          gcc --version
+          cmake --version
+          ninja --version
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Configure CMake
+        run: |
+          set -eux
+          cmake \
+            -G Ninja \
+            -B build \
+            -S runtimes \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DLLVM_ENABLE_RUNTIMES="libc;compiler-rt" \
+            -DLLVM_LIBC_INCLUDE_SCUDO=ON \
+            -DCOMPILER_RT_BUILD_SCUDO_STANDALONE_WITH_LLVM_LIBC=ON \
+            -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
+            -DCOMPILER_RT_SCUDO_STANDALONE_BUILD_SHARED=OFF \
+            -DLLVM_LIBC_FULL_BUILD=ON
+
+      - name: Build check-libc
+        run: |
+          set -eux
+          cmake --build build --parallel --target check-libc
