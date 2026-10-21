@@ -17,6 +17,7 @@ else()
     SRCS
       shared_math_test.cpp
     DEPENDS
+      libc.hdr.fenv_macros
       libc.src.__support.FPUtil.float128
       libc.src.__support.FPUtil.fp_bits
       libc.src.__support.math.acos
@@ -468,6 +469,7 @@ else()
       libc.src.__support.math.setpayloadsigl
       libc.src.__support.math.sqrtf16
       libc.src.__support.math.sin
+      libc.src.__support.math.sinbf16
       libc.src.__support.math.sincos
       libc.src.__support.math.sincosf
       libc.src.__support.math.sinf

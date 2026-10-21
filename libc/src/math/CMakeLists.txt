@@ -154,6 +154,7 @@ add_math_entrypoint_object(expf16)
 add_math_entrypoint_object(expbf16)
 
 add_math_entrypoint_object(exp2)
+add_math_entrypoint_object(exp2bf16)
 add_math_entrypoint_object(exp2f)
 add_math_entrypoint_object(exp2f16)
 
@@ -574,6 +575,7 @@ add_math_entrypoint_object(sincos)
 add_math_entrypoint_object(sincosf)
 
 add_math_entrypoint_object(sin)
+add_math_entrypoint_object(sinbf16)
 add_math_entrypoint_object(sinf)
 add_math_entrypoint_object(sinf16)
 add_math_entrypoint_object(sinpif)
