@@ -226,7 +226,10 @@ void lto::DTLTO::buildCommonRemoteCompilerOptions() {
     Ops.push_back("-ffunction-sections");
   if (C.Options.DataSections)
     Ops.push_back("-fdata-sections");
-  if (C.PTO.LoopInterchange)
+  // Match what an in-process backend resolves from C.LibraryOptions.
+  cl::LibraryOptionsContext NoLibraryOptions;
+  if (*C.PTO.resolve(C.LibraryOptions ? *C.LibraryOptions : NoLibraryOptions)
+           .LoopInterchange)
     Ops.push_back("-floop-interchange");
 
   if (C.RelocModel == Reloc::PIC_)
@@ -325,10 +328,12 @@ Error lto::DTLTO::addObjectFilesToLink() {
             createStringError(inconvertibleErrorCode(),
                               "Cannot get a cache file stream: %s",
                               Job.NativeObjectPath.data()));
-      // Store a file buffer into the cache stream.
+
       auto &CacheStream = *(CachedFileStreamOrErr->get());
-      *(CacheStream.OS) << ObjFileMbRef.getBuffer();
-      if (Error Err = CacheStream.commit())
+
+      // This object file will be renamed into cache entry file. The file
+      // memory buffer will be added to lld list of object files.
+      if (Error Err = CacheStream.commit(std::move(ObjFileMbOrErr.get())))
         return Err;
     } else {
       if (AddBuffer) {

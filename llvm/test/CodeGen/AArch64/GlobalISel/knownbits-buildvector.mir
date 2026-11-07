@@ -3,6 +3,7 @@
 
 ---
 name:            const
+tracksRegLiveness: false
 body:             |
   bb.1:
   ; CHECK-LABEL: name: @const
@@ -15,6 +16,7 @@ body:             |
 ...
 ---
 name:            const_lane1
+tracksRegLiveness: false
 body:             |
   bb.1:
   ; CHECK-LABEL: name: @const_lane1
@@ -31,6 +33,7 @@ body:             |
 ...
 ---
 name:            sextsignbits
+tracksRegLiveness: false
 body:             |
   bb.1:
   ; CHECK-LABEL: name: @sextsignbits
@@ -47,6 +50,7 @@ body:             |
 ...
 ---
 name:            sextsignbits_lane1
+tracksRegLiveness: false
 body:             |
   bb.1:
   ; CHECK-LABEL: name: @sextsignbits_lane1
@@ -56,7 +60,7 @@ body:             |
   ; CHECK-NEXT: %3:_ KnownBits:???????????????????????????????? SignBits:17 IsKnownNeverZero:0
   ; CHECK-NEXT: %4:_ KnownBits:???????????????????????????????? SignBits:17 IsKnownNeverZero:0
   ; CHECK-NEXT: %idx:_ KnownBits:0000000000000000000000000000000000000000000000000000000000000001 SignBits:63 IsKnownNeverZero:1
-  ; CHECK-NEXT: %6:_ KnownBits:???????????????????????????????? SignBits:1 IsKnownNeverZero:0
+  ; CHECK-NEXT: %6:_ KnownBits:???????????????????????????????? SignBits:17 IsKnownNeverZero:0
     %0:_(i8) = COPY $b0
     %1:_(i16) = COPY $h1
     %2:_(i32) = G_SEXT %0
